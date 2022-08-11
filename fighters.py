@@ -15,12 +15,16 @@ class Unit:
     @property
     def damage(self) -> int:
         """Урон"""
-        self.damage_done = randint(1, 4)
+        self.damage_done = randint(1, 5)
         return self.damage_done
 
     def hit(self, unit: 'Unit') -> None:
         """Удар"""
         unit.health -= self.damage
+
+    def winner(self) -> str:
+        """Возвращаем итоговую надпись"""
+        return f"{self} Winner!!" if self.health > 0 else f"{self} Lose"
 
 
 class Fighters:
@@ -33,8 +37,6 @@ class Fighters:
         if self.position >= len(self._fighters):
             self.position = 0
         fighter = self._fighters[self.position]
-        if fighter.health <= 0:
-            raise StopIteration()
         self.position += 1
         if self.position >= len(self._fighters):
             self.position = 0
@@ -42,7 +44,12 @@ class Fighters:
         return fighter
 
     def alive(self) -> bool:
-        return all([fighter.health for fighter in self._fighters])
+        return all(
+            [
+                True if fighter.health > 0 else False
+                for fighter in self._fighters
+            ]
+        )
 
     def add_fighter(self, fighter: Unit) -> None:
         """Добавляем бойца"""
@@ -58,10 +65,17 @@ def start():
     fighters.add_fighter(monster)
 
     while fighters.alive():
-        f1 = next(fighters)
-        f2 = next(fighters)
-        f1.hit(f2)
-        print(f'{f2} was damaged and lost {f1.damage_done} health and now has {f2.health} health.')
+        attacking_fighter = next(fighters)
+        protection_fighter = next(fighters)
+        attacking_fighter.hit(protection_fighter)
+        print(
+            f"{protection_fighter} was damaged and lost "
+            f"{attacking_fighter.damage_done} health and "
+            f"now has {protection_fighter.health} health."
+        )
+
+    print(hero.winner())
+    print(monster.winner())
 
 
 if __name__ == '__main__':
